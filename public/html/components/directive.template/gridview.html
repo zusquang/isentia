@@ -1,0 +1,19 @@
+<div id="isentia-sv" class="isentia-sv-switcher isentia-sv-view-grid">
+  <div class="isentia-sv-options">
+    <form style="position: absolute;margin: 5px;" class="form-inline">
+      <div class="form-group">
+          <input type="text" class="form-control" placeholder="Searching tags" style="width: 500px" ng-model="tagsSearched">
+        </div>
+        <button type="button" class="btn btn-primary isentia-sv-search">Search</button>
+    </form>
+    <a href="#" class="isentia-sv-icon isentia-sv-grid isentia-sv-selected" data-view="isentia-sv-view-grid">Grid View</a>
+    <a href="#" class="isentia-sv-icon isentia-sv-list" data-view="isentia-sv-view-list">List View</a>
+  </div>
+  <ul>
+    <li ng-repeat="photo in photos">
+      <div class="isentia-sv-author">{{ photo.author }}</div>
+      <div class="isentia-sv-description" ng-html="photo.description"></div>
+      <h3 class="isentia-sv-title">{{ photo.title }}</h3>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,42 @@
+{
+  "name": "isentia-proj",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter spec"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "angular": "^1.5.0",
+    "angular-sanitize": "^1.5.0",
+    "angular-ui-router": "^0.2.18",
+    "browserify": "^13.0.0",
+    "chai": "^3.5.0",
+    "chai-http": "^1.0.0",
+    "connect-history-api-fallback": "^1.1.0",
+    "datatables.net": "^1.10.11",
+    "datatables.net-bs": "^1.10.11",
+    "event-stream": "^3.3.2",
+    "express": "^4.13.4",
+    "glob": "^7.0.3",
+    "gulp": "^3.9.1",
+    "gulp-browserify": "^0.5.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-connect": "^2.2.0",
+    "gulp-inject": "^3.0.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-ruby-sass": "^2.0.6",
+    "gulp-uglify": "^1.5.3",
+    "jquery": "^2.2.1",
+    "log4js": "^0.6.33",
+    "mocha": "^2.4.5",
+    "request": "^2.69.0",
+    "vinyl-source-stream": "^1.1.0",
+    "vinyl-transform": "^1.0.0"
+  },
+  "devDependencies": {
+    "gulp-angular-filesort": "^1.1.1"
+  }
+}
