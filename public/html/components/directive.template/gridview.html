@@ -1,6 +1,6 @@
-<div id="isentia-sv" class="isentia-sv-switcher isentia-sv-view-grid">
+<div id="isentia-sv" class="isentia-sv-switcher isentia-sv-view-grid" ng-scroll="loadMore()">
   <div class="isentia-sv-options">
-    <form style="position: absolute;margin: 5px;" class="form-inline">
+    <form class="form-inline isentia-form">
       <div class="form-group">
           <input type="text" class="form-control" placeholder="Searching tags" style="width: 500px" ng-model="tagsSearched">
         </div>
@@ -10,10 +10,11 @@
     <a href="#" class="isentia-sv-icon isentia-sv-list" data-view="isentia-sv-view-list">List View</a>
   </div>
   <ul>
-    <li ng-repeat="photo in photos">
+    <li ng-repeat="photo in photos" >
       <div class="isentia-sv-author">{{ photo.author }}</div>
       <div class="isentia-sv-description" ng-html="photo.description"></div>
       <h3 class="isentia-sv-title">{{ photo.title }}</h3>
     </li>
   </ul>
 </div>
+<div class="isentia-overlay" ng-if="busy"><img class="isentia-loading" src="http://bit.ly/pMtW1K"></div>

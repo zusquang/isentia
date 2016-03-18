@@ -45530,8 +45530,45 @@ return jQuery;
 },{}],7:[function(require,module,exports){
 (function() {
   'use strict';    
-  var angular = require('angular'),
-      jQuery = require('jquery');
+  var jQuery = require('jquery'),
+      angular = require('angular');
+
+  angular.module('data.scroll.directive', []).directive('ngScroll', [ '$rootScope', '$window', '$timeout', dataScroll ]);
+
+  function dataScroll( $rootScope, $window, $timeout ) {
+    var _link = function ( scope, ele, attrs ) {
+      var gWindow = jQuery(window),
+          gDocument = jQuery(document);
+
+      var _handler = function() {
+        if(gWindow.scrollTop() + gWindow.height() == gDocument.height()) { 
+          if ($rootScope.$$phase) {
+            return scope.$eval(attrs.ngScroll);
+          } else {
+            return scope.$apply(attrs.ngScroll);
+          }
+        }
+      };
+
+      gWindow.on('scroll', _handler);
+      scope.$on('$destroy', function() {
+        return gWindow.off('scroll');
+      });  
+    }
+
+    return {
+      //restrict: _restrict,
+      link : _link
+    };
+  }
+
+})();
+
+},{"angular":5,"jquery":6}],8:[function(require,module,exports){
+(function() {
+  'use strict';    
+  var jQuery = require('jquery'),
+      angular = require('angular');
 
   var StringUtils = require('../util/string.util');
 
@@ -45544,26 +45581,25 @@ return jQuery;
 
  		var _link = function( scope, ele, attrs ) {
  			var container = '#isentia-sv',
-          optionSwitch = jQuery( '.isentia-sv-options' ).children( 'a' );
+          optionSwitch = jQuery( '.isentia-sv-options' ).children( 'a' ),
+          page = 1;
+
+      scope.photos = [];
+      scope.busy = false;
+
+      _init();
 
       function _init() {
-        optionSwitch.each( function( idx, el ) {
-          jQuery( el ).on( 'click', function( ev ) {
-            ev.preventDefault();
-            _switch( ev );
-          } );
-        } );
+        // Switch view mode listener
+        _switchOptionOnClick();
 
         // Page loaded
-        PhotoFactory.getPhotos().then(function( photos ) {
-          scope.photos = StringUtils.fromJson( photos ).items;
-        });
+        _getPhotosByTarget(page);
 
         // Tags searched
         jQuery( '.isentia-sv-search' ).on( 'click', function( ev ) {
-          PhotoFactory.getPhotosByTags(scope.tagsSearched).then(function( photos ) {
-            scope.photos = StringUtils.fromJson( photos ).items;
-          });
+          _emptyPhotos();
+          _getPhotosByTarget(page);
         });
       }
 
@@ -45590,9 +45626,49 @@ return jQuery;
           jQueryel.removeClass( c );
         }
       };
+    
+      function _switchOptionOnClick() {
+        optionSwitch.each( function( idx, el ) {
+          jQuery( el ).on( 'click', function( ev ) {
+            ev.preventDefault();
+            _switch( ev );
+          } );
+        } );
+      }
 
-      _init();
+      function _buildPhotos(photos) {
+        var loadedItems = StringUtils.fromJson( photos ).items;
+        for ( var i = 0; i < loadedItems.length; i++ ) {
+          scope.photos.push(loadedItems[i]);
+        }
+        scope.busy = false;
+      }
 
+      function _getPhotosByTarget(page) {
+        scope.busy = true;
+
+        if (!scope.tagsSearched) {
+          PhotoFactory.getPhotos(page).then(function( photos ) {
+            _buildPhotos(photos);
+          });
+        } else {
+          _emptyPhotos();
+          PhotoFactory.getPhotosByTags(page, StringUtils.replace(scope.tagsSearched, /[ ,]+/g, ',')).then(function( photos ) {
+            _buildPhotos(photos);
+          });
+        }
+      }
+
+      function _emptyPhotos() {
+        scope.photos = [];
+      }
+
+      scope.loadMore = function() {
+        // Because feed only return 20 items then no need load more data when searching.
+        if (!scope.tagsSearched) {
+          _getPhotosByTarget(++page);
+        }
+      }
  		}
 
  		return {
@@ -45605,7 +45681,7 @@ return jQuery;
 	}
 })();
 
-},{"../util/string.util":11,"angular":5,"jquery":6}],8:[function(require,module,exports){
+},{"../util/string.util":12,"angular":5,"jquery":6}],9:[function(require,module,exports){
 (function() {
   'use strict';    
   var angular = require('angular');
@@ -45632,18 +45708,18 @@ return jQuery;
   }
 })();
 
-},{"angular":5}],9:[function(require,module,exports){
+},{"angular":5}],10:[function(require,module,exports){
 (function() {
   'use strict';
-  var angular = require('angular');
+  var angular = require( 'angular' );
 
-  angular.module('photo.factory', []).factory('PhotoFactory', [ '$http', '$q', '$log', photoFactory ]);
+  angular.module( 'photo.factory', [] ).factory('PhotoFactory', [ '$http', '$q', '$log', photoFactory ]);
 
-  function photoFactory($http, $q, $log) {
-    var _getPhotos = function () {
+  function photoFactory( $http, $q, $log ) {
+    var _getPhotos = function ( page ) {
       var def = $q.defer(); 
       $http({
-        url: 'https://isentia.herokuapp.com/api/photos',
+        url: 'https://isentia.herokuapp.com/api/photos/' + page,
         headers : { "Access-Control-Allow-Origin": "*" }
       }).then(function( result ){
         def.resolve( result.data.wrapper.data );
@@ -45654,10 +45730,10 @@ return jQuery;
       return def.promise;
     }
 
-    var _getPhotosByTags = function (tagsSearched) {
+    var _getPhotosByTags = function ( page, tagsSearched ) {
       var def = $q.defer(); 
       $http({
-        url: 'https://isentia.herokuapp.com/api/photos/tags/' + tagsSearched,
+        url: 'https://isentia.herokuapp.com/api/photos/' + page + '/tags/' + tagsSearched,
         headers : { "Access-Control-Allow-Origin": "*" }
       }).then(function( result ){
         def.resolve( result.data.wrapper.data );
@@ -45675,7 +45751,7 @@ return jQuery;
   }
 })();
 
-},{"angular":5}],10:[function(require,module,exports){
+},{"angular":5}],11:[function(require,module,exports){
 (function() {
 	'use strict';
 	var angular = require('angular');
@@ -45687,14 +45763,14 @@ return jQuery;
 	}
 })();
 
-},{"angular":5}],11:[function(require,module,exports){
+},{"angular":5}],12:[function(require,module,exports){
 function StringUtils() {}
 
-var _isString = function(value) {
+var _isString = function( value ) {
   return typeof value === 'string';
 }
 
-StringUtils.prototype.fromJson = function(str) {
+StringUtils.prototype.fromJson = function( str ) {
   if (_isString(str)) {
     // Fixing SCRIPT1014: Invalid character: https://msdn.microsoft.com/library/cc836466(v=vs.94).aspx
     return JSON.parse(str.replace(/\\'/g, "'"));
@@ -45702,9 +45778,16 @@ StringUtils.prototype.fromJson = function(str) {
   return str;
 };
 
+StringUtils.prototype.replace = function( str, oldletter, newletter ) {
+  if (_isString(str)) {
+    return str.replace(oldletter, newletter);
+  }
+  return str;
+};
+
 module.exports = new StringUtils();
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function() {
   	'use strict';
 	require('angular');
@@ -45719,12 +45802,14 @@ module.exports = new StringUtils();
 	// ---> directives
 	require('./components/directive/gridview.directive');
 	require('./components/directive/html.binding.directive');
+	require('./components/directive/data.scroll.directive');
 
 	var isentia = angular.module('isentia', [ require('angular-ui-router'), require('angular-sanitize'),
 		'photo.controller', 
 		'photo.factory', 
 		'gridview.directive', 
-		'html.binding.directive'
+		'html.binding.directive',
+		'data.scroll.directive'
 		 ]);
 	// configurations
 	isentia.config(routerConfig);
@@ -45742,4 +45827,4 @@ module.exports = new StringUtils();
 	angular.bootstrap(document, ['isentia']);
 })();
 
-},{"./components/directive/gridview.directive":7,"./components/directive/html.binding.directive":8,"./components/factory/photo.factory":9,"./components/photo/photo.controller":10,"angular":5,"angular-sanitize":2,"angular-ui-router":3}]},{},[12]);
+},{"./components/directive/data.scroll.directive":7,"./components/directive/gridview.directive":8,"./components/directive/html.binding.directive":9,"./components/factory/photo.factory":10,"./components/photo/photo.controller":11,"angular":5,"angular-sanitize":2,"angular-ui-router":3}]},{},[13]);

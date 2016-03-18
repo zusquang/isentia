@@ -12,12 +12,14 @@
 	// ---> directives
 	require('./components/directive/gridview.directive');
 	require('./components/directive/html.binding.directive');
+	require('./components/directive/data.scroll.directive');
 
 	var isentia = angular.module('isentia', [ require('angular-ui-router'), require('angular-sanitize'),
 		'photo.controller', 
 		'photo.factory', 
 		'gridview.directive', 
-		'html.binding.directive'
+		'html.binding.directive',
+		'data.scroll.directive'
 		 ]);
 	// configurations
 	isentia.config(routerConfig);

@@ -13,6 +13,31 @@
   border: 3px solid #0275d8;
 }
 
+.isentia-form {
+  position: absolute;
+  margin: 5px;
+}
+
+.isentia-overlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background: #000;
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}
+
+.isentia-loading {
+    width: 50px;
+    height: 57px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -28px 0 0 -25px;
+}
+
 /* options/select wrapper with switch anchors */
 
 .isentia-sv-options {

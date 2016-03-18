@@ -23,7 +23,7 @@ function _responseFailure ( msg, res ) {
 module.exports = function(app) {
 	// api ---------------------------------------------------------------------
 	app.get(APIs.GET_PHOTOS, function( request, response ) {
-		PhotoServive.getPhotos( function( err, res, photos ) {
+		PhotoServive.getPhotos( request.params.page, function( err, res, photos ) {
 			if (err && res.statusCode != 200) {
 				LOGGER.error('Could not retrieve data from request ' + APIs.GET_PHOTOS + ' caused by ' + err);
 				_responseFailure('Get photos fail, please try again', response);
@@ -33,7 +33,7 @@ module.exports = function(app) {
 	});
 
 	app.get(APIs.GET_PHOTOS_BY_TAGS, function( request, response ) {
-		PhotoServive.getPhotosByTags( request.params.tags, function( err, res, photos) {
+		PhotoServive.getPhotosByTags( request.params.page, request.params.tags, function( err, res, photos) {
 			if (err && res.statusCode != 200) {
 				LOGGER.error('Could not retrieve data from request ' + APIs.GET_PHOTOS_BY_TAGS + ' caused by ' + err);
 				_responseFailure('Get photos fail, please try again', response);

@@ -1,7 +1,7 @@
 (function() {
   'use strict';    
-  var angular = require('angular'),
-      jQuery = require('jquery');
+  var jQuery = require('jquery'),
+      angular = require('angular');
 
   var StringUtils = require('../util/string.util');
 
@@ -14,26 +14,25 @@
 
  		var _link = function( scope, ele, attrs ) {
  			var container = '#isentia-sv',
-          optionSwitch = jQuery( '.isentia-sv-options' ).children( 'a' );
+          optionSwitch = jQuery( '.isentia-sv-options' ).children( 'a' ),
+          page = 1;
+
+      scope.photos = [];
+      scope.busy = false;
+
+      _init();
 
       function _init() {
-        optionSwitch.each( function( idx, el ) {
-          jQuery( el ).on( 'click', function( ev ) {
-            ev.preventDefault();
-            _switch( ev );
-          } );
-        } );
+        // Switch view mode listener
+        _switchOptionOnClick();
 
         // Page loaded
-        PhotoFactory.getPhotos().then(function( photos ) {
-          scope.photos = StringUtils.fromJson( photos ).items;
-        });
+        _getPhotosByTarget(page);
 
         // Tags searched
         jQuery( '.isentia-sv-search' ).on( 'click', function( ev ) {
-          PhotoFactory.getPhotosByTags(scope.tagsSearched).then(function( photos ) {
-            scope.photos = StringUtils.fromJson( photos ).items;
-          });
+          _emptyPhotos();
+          _getPhotosByTarget(page);
         });
       }
 
@@ -60,9 +59,49 @@
           jQueryel.removeClass( c );
         }
       };
+    
+      function _switchOptionOnClick() {
+        optionSwitch.each( function( idx, el ) {
+          jQuery( el ).on( 'click', function( ev ) {
+            ev.preventDefault();
+            _switch( ev );
+          } );
+        } );
+      }
 
-      _init();
+      function _buildPhotos(photos) {
+        var loadedItems = StringUtils.fromJson( photos ).items;
+        for ( var i = 0; i < loadedItems.length; i++ ) {
+          scope.photos.push(loadedItems[i]);
+        }
+        scope.busy = false;
+      }
 
+      function _getPhotosByTarget(page) {
+        scope.busy = true;
+
+        if (!scope.tagsSearched) {
+          PhotoFactory.getPhotos(page).then(function( photos ) {
+            _buildPhotos(photos);
+          });
+        } else {
+          _emptyPhotos();
+          PhotoFactory.getPhotosByTags(page, StringUtils.replace(scope.tagsSearched, /[ ,]+/g, ',')).then(function( photos ) {
+            _buildPhotos(photos);
+          });
+        }
+      }
+
+      function _emptyPhotos() {
+        scope.photos = [];
+      }
+
+      scope.loadMore = function() {
+        // Because feed only return 20 items then no need load more data when searching.
+        if (!scope.tagsSearched) {
+          _getPhotosByTarget(++page);
+        }
+      }
  		}
 
  		return {
