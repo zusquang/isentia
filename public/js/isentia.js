@@ -45758,9 +45758,7 @@ return jQuery;
 
 	angular.module('photo.controller', []).controller('PhotoController', photoController);
 
- 	function photoController() {
-     
-	}
+ 	function photoController() {}
 })();
 
 },{"angular":5}],12:[function(require,module,exports){

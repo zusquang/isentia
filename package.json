@@ -15,12 +15,7 @@
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
     "chai-http": "^1.0.0",
-    "connect-history-api-fallback": "^1.1.0",
-    "datatables.net": "^1.10.11",
-    "datatables.net-bs": "^1.10.11",
-    "event-stream": "^3.3.2",
     "express": "^4.13.4",
-    "glob": "^7.0.3",
     "gulp": "^3.9.1",
     "gulp-browserify": "^0.5.1",
     "gulp-concat": "^2.6.0",
@@ -33,10 +28,8 @@
     "log4js": "^0.6.33",
     "mocha": "^2.4.5",
     "request": "^2.69.0",
+    "should": "^8.2.2",
     "vinyl-source-stream": "^1.1.0",
     "vinyl-transform": "^1.0.0"
-  },
-  "devDependencies": {
-    "gulp-angular-filesort": "^1.1.1"
   }
 }

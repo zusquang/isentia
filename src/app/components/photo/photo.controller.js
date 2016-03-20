@@ -4,7 +4,5 @@
 
 	angular.module('photo.controller', []).controller('PhotoController', photoController);
 
- 	function photoController() {
-     
-	}
+ 	function photoController() {}
 })();

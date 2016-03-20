@@ -27,7 +27,6 @@
     }
 
     return {
-      //restrict: _restrict,
       link : _link
     };
   }

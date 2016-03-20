@@ -4,15 +4,6 @@ var sass = require('gulp-ruby-sass');
 var connect = require('gulp-connect');
 var source = require('vinyl-source-stream');
 var browserify = require('browserify');
-//var history = require('connect-history-api-fallback');
-//var concat = require('gulp-concat');
-//var uglify = require('gulp-uglify');
-//var transform = require('vinyl-transform');
-//var angularFilesort = require('gulp-angular-filesort');
-// var inject = require('gulp-inject');
-// var glob = require('glob');
-// var es = require('event-stream');
-// var rename = require('gulp-rename'); 
 
 gulp.task('connect', function () {
     connect.server({
