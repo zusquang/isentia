@@ -8,7 +8,7 @@
     var _getPhotos = function ( page ) {
       var def = $q.defer(); 
       $http({
-        url: 'https://isentia.herokuapp.com/api/photos/' + page,
+        url: 'http://localhost:6060/api/photos/' + page,
         headers : { "Access-Control-Allow-Origin": "*" }
       }).then(function( result ){
         def.resolve( result.data.wrapper.data );
@@ -22,7 +22,7 @@
     var _getPhotosByTags = function ( page, tagsSearched ) {
       var def = $q.defer(); 
       $http({
-        url: 'https://isentia.herokuapp.com/api/photos/' + page + '/tags/' + tagsSearched,
+        url: 'http://localhost:6060/api/photos/' + page + '/tags/' + tagsSearched,
         headers : { "Access-Control-Allow-Origin": "*" }
       }).then(function( result ){
         def.resolve( result.data.wrapper.data );
