@@ -3,8 +3,8 @@
   var angular = require('angular');
 
   angular.module('html.binding.directive', []).directive('ngHtml', [ '$compile', htmlBinding ]);
-
   function htmlBinding( $compile ) {
+
     var _link = function ( scope, ele, attrs ) {
       if ( attrs.ngHtml ) {
             ele.html( scope.$eval( attrs.ngHtml ) );

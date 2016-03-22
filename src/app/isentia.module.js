@@ -13,13 +13,15 @@
 	require('./components/directive/gridview.directive');
 	require('./components/directive/html.binding.directive');
 	require('./components/directive/data.scroll.directive');
+	require('./components/directive/auto.trigger.directive');
 
 	var isentia = angular.module('isentia', [ require('angular-ui-router'), require('angular-sanitize'),
 		'photo.controller', 
 		'photo.factory', 
 		'gridview.directive', 
 		'html.binding.directive',
-		'data.scroll.directive'
+		'data.scroll.directive',
+		'auto.trigger.directive'
 		 ]);
 	// configurations
 	isentia.config(routerConfig);

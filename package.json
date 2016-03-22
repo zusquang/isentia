@@ -29,6 +29,7 @@
     "mocha": "^2.4.5",
     "request": "^2.69.0",
     "should": "^8.2.2",
+    "underscore": "^1.8.3",
     "vinyl-source-stream": "^1.1.0",
     "vinyl-transform": "^1.0.0"
   }

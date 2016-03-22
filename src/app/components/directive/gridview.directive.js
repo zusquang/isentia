@@ -1,19 +1,18 @@
 (function() {
   'use strict';    
   var jQuery = require('jquery'),
-      angular = require('angular');
-
-  var StringUtils = require('../util/string.util');
+      angular = require('angular'),
+      StringUtils = require('../util/string.util');
 
   angular.module('gridview.directive', []).directive('gridview', [ 'PhotoFactory', gridviewDirective ]);
+  function gridviewDirective(PhotoFactory) {
 
- 	function gridviewDirective(PhotoFactory) {
     var _restrict = 'A',
         _scope = { photos: '@' },
         _template = './html/components/directive.template/gridview.html';
 
- 		var _link = function( scope, ele, attrs ) {
- 			var container = '#isentia-sv',
+    var _link = function( scope, ele, attrs ) {
+      var container = '#isentia-sv',
           optionSwitch = jQuery( '.isentia-sv-options' ).children( 'a' ),
           page = 1;
 
@@ -31,8 +30,7 @@
 
         // Tags searched
         jQuery( '.isentia-sv-search' ).on( 'click', function( ev ) {
-          _emptyPhotos();
-          _getPhotosByTarget(page);
+          _search();
         });
       }
 
@@ -96,20 +94,30 @@
         scope.photos = [];
       }
 
+      function _search() {
+        _emptyPhotos();
+        _getPhotosByTarget(page);
+      }
+
       scope.loadMore = function() {
         // Because feed only return 20 items then no need load more data when searching.
         if (!scope.tagsSearched) {
           _getPhotosByTarget(++page);
         }
       }
- 		}
 
- 		return {
+      scope.search = function() {
+        _search();
+      }
+
+    }
+
+    return {
         restrict: _restrict,
         scope : _scope,
         transclude : true,
         templateUrl : _template,
         link: _link
     };
-	}
+  }
 })();
