@@ -25,7 +25,11 @@ app.use(function(req, res, next) {
 });
 
 // routes ======================================================================
- require('./server/routes/photo.route.js')(app);
+app.all('/api/*', function( request, response, next ) {
+  next(); 
+});
+require('./server/routes/photo.route.js')(app);
+require('./server/routes/paypal.route.js')(app);
 
 // application -------------------------------------------------------------
 app.get('*', function(req, res) {

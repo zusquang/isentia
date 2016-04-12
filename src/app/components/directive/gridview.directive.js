@@ -4,8 +4,8 @@
       angular = require('angular'),
       StringUtils = require('../util/string.util');
 
-  angular.module('gridview.directive', []).directive('gridview', [ 'PhotoFactory', gridviewDirective ]);
-  function gridviewDirective(PhotoFactory) {
+  angular.module('gridview.directive', []).directive('gridview', [ 'PhotoFactory', 'PaypalFactory', '$window', '$timeout', gridviewDirective ]);
+  function gridviewDirective(PhotoFactory, PaypalFactory, $window, $timeout) {
 
     var _restrict = 'A',
         _scope = { photos: '@' },
@@ -15,6 +15,8 @@
       var container = '#isentia-sv',
           optionSwitch = jQuery( '.isentia-sv-options' ).children( 'a' ),
           page = 1;
+
+      var postInitTimeout = 0;
 
       scope.photos = [];
       scope.busy = false;
@@ -67,6 +69,13 @@
         } );
       }
 
+      function _postInit() {
+        var postLoadFn = attrs['postLoad'].substring(0, attrs['postLoad'].length - 2);
+        if ( typeof scope.$parent[postLoadFn] === 'function' ) {
+           scope.$apply(scope.$parent[postLoadFn]);  
+        }
+      }
+
       function _buildPhotos(photos) {
         var loadedItems = StringUtils.fromJson( photos ).items;
         for ( var i = 0; i < loadedItems.length; i++ ) {
@@ -109,6 +118,18 @@
       scope.search = function() {
         _search();
       }
+
+      scope.$watch('busy', function(old, val){
+        if (old != val) {
+          postInitTimeout = $timeout(function() {
+            _postInit();
+          })
+        }
+      });
+
+      scope.$on('$destroy', function() {
+        $timeout.cancel(postInitTimeout);
+      }); 
 
     }
 

@@ -1,1 +1,7 @@
-  <div gridview></div>
+<div gridview post-load='openPaymentForm()'></div>
+
+<div class="isentia-overlay" ng-show="showPayment"></div>
+<div class='paypal-required' ng-show="showPayment">
+    <div style="padding-bottom: 25px;">In order to continue using and maintaining the site, we need some fees!</div>
+    <button class="btn btn-primary" type="button" ng-click="createPayment()">Create Payment</button>
+</div>

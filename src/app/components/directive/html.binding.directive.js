@@ -11,10 +11,10 @@
             $compile( ele.contents() )( scope );
         }
         scope.$watch( attrs.ngHtml, function( newValue, oldValue ) {
-            if (newValue && newValue !== oldValue) {
-                ele.html( newValue );
-                $compile( ele.contents() )( scope );
-            }
+          if (newValue && newValue !== oldValue) {
+              ele.html( newValue );
+              $compile( ele.contents() )( scope );
+          }
         } );
     }
 

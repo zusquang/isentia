@@ -47315,8 +47315,8 @@ return jQuery;
       angular = require('angular'),
       StringUtils = require('../util/string.util');
 
-  angular.module('gridview.directive', []).directive('gridview', [ 'PhotoFactory', gridviewDirective ]);
-  function gridviewDirective(PhotoFactory) {
+  angular.module('gridview.directive', []).directive('gridview', [ 'PhotoFactory', 'PaypalFactory', '$window', '$timeout', gridviewDirective ]);
+  function gridviewDirective(PhotoFactory, PaypalFactory, $window, $timeout) {
 
     var _restrict = 'A',
         _scope = { photos: '@' },
@@ -47326,6 +47326,8 @@ return jQuery;
       var container = '#isentia-sv',
           optionSwitch = jQuery( '.isentia-sv-options' ).children( 'a' ),
           page = 1;
+
+      var postInitTimeout = 0;
 
       scope.photos = [];
       scope.busy = false;
@@ -47378,6 +47380,13 @@ return jQuery;
         } );
       }
 
+      function _postInit() {
+        var postLoadFn = attrs['postLoad'].substring(0, attrs['postLoad'].length - 2);
+        if ( typeof scope.$parent[postLoadFn] === 'function' ) {
+           scope.$apply(scope.$parent[postLoadFn]);  
+        }
+      }
+
       function _buildPhotos(photos) {
         var loadedItems = StringUtils.fromJson( photos ).items;
         for ( var i = 0; i < loadedItems.length; i++ ) {
@@ -47421,6 +47430,18 @@ return jQuery;
         _search();
       }
 
+      scope.$watch('busy', function(old, val){
+        if (old != val) {
+          postInitTimeout = $timeout(function() {
+            _postInit();
+          })
+        }
+      });
+
+      scope.$on('$destroy', function() {
+        $timeout.cancel(postInitTimeout);
+      }); 
+
     }
 
     return {
@@ -47433,7 +47454,7 @@ return jQuery;
   }
 })();
 
-},{"../util/string.util":14,"angular":5,"jquery":6}],11:[function(require,module,exports){
+},{"../util/string.util":18,"angular":5,"jquery":6}],11:[function(require,module,exports){
 (function() {
   'use strict';    
   var angular = require('angular');
@@ -47447,10 +47468,10 @@ return jQuery;
             $compile( ele.contents() )( scope );
         }
         scope.$watch( attrs.ngHtml, function( newValue, oldValue ) {
-            if (newValue && newValue !== oldValue) {
-                ele.html( newValue );
-                $compile( ele.contents() )( scope );
-            }
+          if (newValue && newValue !== oldValue) {
+              ele.html( newValue );
+              $compile( ele.contents() )( scope );
+          }
         } );
     }
 
@@ -47465,9 +47486,59 @@ return jQuery;
   'use strict';
   var angular = require( 'angular' );
 
-  angular.module( 'photo.factory', [] ).factory('PhotoFactory', [ '$http', '$q', '$log', photoFactory ]);
+  angular.module( 'paypal.factory', [] ).factory('PaypalFactory', [ '$http', '$q', '$log', PaypalFactory ]);
+  function PaypalFactory( $http, $q, $log ) {
 
+    var _createPayment = function () {
+      var def = $q.defer(); 
+      $http({
+        url: 'https://isentia.herokuapp.com/api/payment/create',
+        method: 'POST',
+        headers: { "Access-Control-Allow-Origin": "*" }
+      }).then(function( result ){
+        def.resolve( result.data.wrapper );
+      }, function( error ){
+        $log.error( 'Error: ', error);
+        def.reject( error );
+      });
+      return def.promise;
+    }
+
+    var _executePayment = function (paymentId, payerId) {
+      var def = $q.defer(); 
+      $http({
+        url: 'https://isentia.herokuapp.com/api/payment/execute',
+        method: 'POST',
+        headers: { "Access-Control-Allow-Origin": "*" },
+        data: {
+          'paymentId': paymentId,
+          'payerId': payerId
+        }
+      }).then(function( result ){
+        def.resolve( result.data.wrapper );
+      }, function( error ){
+        $log.error( 'Error: ', error);
+        def.reject( error );
+      });
+      return def.promise;
+    }
+
+    return {
+      createPayment : _createPayment,
+      executePayment : _executePayment
+    }
+    
+  }
+})();
+
+},{"angular":5}],13:[function(require,module,exports){
+(function() {
+  'use strict';
+  var angular = require( 'angular' );
+
+  angular.module( 'photo.factory', [] ).factory('PhotoFactory', [ '$http', '$q', '$log', photoFactory ]);
   function photoFactory( $http, $q, $log ) {
+
     var _getPhotos = function ( page ) {
       var def = $q.defer(); 
       $http({
@@ -47500,20 +47571,96 @@ return jQuery;
       getPhotos : _getPhotos,
       getPhotosByTags : _getPhotosByTags
     }
+    
   }
 })();
 
-},{"angular":5}],13:[function(require,module,exports){
+},{"angular":5}],14:[function(require,module,exports){
 (function() {
-	'use strict';
-	var angular = require('angular');
+  'use strict';    
+  var angular = require('angular');
 
-	angular.module('photo.controller', []).controller('PhotoController', photoController);
-
- 	function photoController() {}
+  angular.module('url.query.filter', []).filter( 'urlquery', [ '$window' , function( $window ) {
+    return function (sParam) {
+      var sPageURL = $window.location.hash.split('?')[1];
+      if ( typeof sPageURL === 'undefined' ) {
+        return false;
+      } 
+      var sURLVariables = sPageURL.split('&');
+      for ( var i = 0; i < sURLVariables.length; i++ ) {
+        var sParameterName = sURLVariables[i].split('=');
+        if ( sParameterName[0] == sParam ) {
+          return sParameterName[1];
+        }
+      }
+    }
+  }]);
 })();
 
-},{"angular":5}],14:[function(require,module,exports){
+},{"angular":5}],15:[function(require,module,exports){
+(function() {
+  'use strict';
+  var jQuery = require('jquery'),
+      angular = require('angular');
+
+  angular.module('payment.cancel.controller', []).controller('PaymentCancelController', [ '$scope', 'PaypalFactory', '$window', PaymentCancelController ]);
+  function PaymentCancelController($scope, PaypalFactory, $window) {
+
+    console.log("cancelled");
+
+  }
+})();
+
+},{"angular":5,"jquery":6}],16:[function(require,module,exports){
+(function() {
+  'use strict';
+  var angular = require('angular');
+
+  angular.module('payment.execute.controller', []).controller('PaymentExecuteController', [ '$scope', 'PaypalFactory', '$location', '$filter', PaymentExecuteController ]);
+  function PaymentExecuteController($scope, PaypalFactory, $location, $filter) {
+
+    $scope.executePayment = function() {
+      PaypalFactory.executePayment($filter('urlquery')('paymentId'), $filter('urlquery')('PayerID')).then(function( res ){
+        if (res.statusCode === 200) {
+          $location.path('/photos');
+        }
+      });
+    }
+
+  }
+})();
+
+},{"angular":5}],17:[function(require,module,exports){
+(function() {
+	'use strict';
+	var jQuery = require('jquery'),
+      angular = require('angular');
+
+	angular.module('photo.controller', []).controller('PhotoController', [ '$scope', 'PaypalFactory', '$window', '$filter', PhotoController ]);
+ 	function PhotoController($scope, PaypalFactory, $window, $filter) {
+
+    if ($filter('urlquery')('paymentId')) {
+      $scope.showPayment = false;
+    } else {
+      $scope.showPayment = true;
+    }
+
+    $scope.openPaymentForm = function() {
+      console.log('post loaded');      
+    }
+
+    $scope.createPayment = function( photo ) {
+      PaypalFactory.createPayment().then(function( res ) {
+        if ( res.payment.payment_method === 'paypal' ) {
+          $window.location.href = res.payment.redirectUrl;
+        }
+      });
+    }
+    
+  }
+})();
+
+},{"angular":5,"jquery":6}],18:[function(require,module,exports){
 function StringUtils() {}
 
 var _isString = function( value ) {
@@ -47537,7 +47684,7 @@ StringUtils.prototype.replace = function( str, oldletter, newletter ) {
 
 module.exports = new StringUtils();
 
-},{}],15:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function() {
   	'use strict';
 	require('angular');
@@ -47545,9 +47692,12 @@ module.exports = new StringUtils();
 	// components
 	// ---> controllers
 	require('./components/photo/photo.controller');
+	require('./components/payment/execute.controller');
+	require('./components/payment/cancel.controller');
 	
 	// ---> factories
 	require('./components/factory/photo.factory');
+	require('./components/factory/paypal.factory');
 
 	// ---> directives
 	require('./components/directive/gridview.directive');
@@ -47555,23 +47705,36 @@ module.exports = new StringUtils();
 	require('./components/directive/data.scroll.directive');
 	require('./components/directive/auto.trigger.directive');
 
+	// ---> filters
+	require('./components/filter/url.query.filter');
+
 	var isentia = angular.module('isentia', [ require('angular-ui-router'), require('angular-sanitize'),
 		'photo.controller', 
+		'payment.execute.controller', 
+		'payment.cancel.controller', 
 		'photo.factory', 
+		'paypal.factory',
 		'gridview.directive', 
 		'html.binding.directive',
 		'data.scroll.directive',
-		'auto.trigger.directive'
-		 ]);
+		'auto.trigger.directive',
+		'url.query.filter' ]);
 	// configurations
 	isentia.config(routerConfig);
 
 	function routerConfig($stateProvider, $urlRouterProvider){
-	    $stateProvider
-	      	.state('photos', {
+	    $stateProvider.state('photos', {
 	        	url: '/photos',
 	        	templateUrl: './html/components/photo/photo.html',
 	        	controller: 'PhotoController'
+	    }).state('payment-execute', {
+	        	url: '/payment/execute',
+	        	templateUrl: './html/components/payment/execute.html',
+	        	controller: 'PaymentExecuteController'
+	    }).state('payment-cancel', {
+	        	url: '/payment/cancel',
+	        	templateUrl: './html/components/payment/cancel.html',
+	        	controller: 'PaymentCancelController'
 	    });
 	    $urlRouterProvider.otherwise('/');
 	}
@@ -47579,4 +47742,4 @@ module.exports = new StringUtils();
 	angular.bootstrap(document, ['isentia']);
 })();
 
-},{"./components/directive/auto.trigger.directive":8,"./components/directive/data.scroll.directive":9,"./components/directive/gridview.directive":10,"./components/directive/html.binding.directive":11,"./components/factory/photo.factory":12,"./components/photo/photo.controller":13,"angular":5,"angular-sanitize":2,"angular-ui-router":3}]},{},[15]);
+},{"./components/directive/auto.trigger.directive":8,"./components/directive/data.scroll.directive":9,"./components/directive/gridview.directive":10,"./components/directive/html.binding.directive":11,"./components/factory/paypal.factory":12,"./components/factory/photo.factory":13,"./components/filter/url.query.filter":14,"./components/payment/cancel.controller":15,"./components/payment/execute.controller":16,"./components/photo/photo.controller":17,"angular":5,"angular-sanitize":2,"angular-ui-router":3}]},{},[19]);

@@ -27,6 +27,7 @@
     "jquery": "^2.2.1",
     "log4js": "^0.6.33",
     "mocha": "^2.4.5",
+    "paypal-rest-sdk": "^1.6.8",
     "request": "^2.69.0",
     "should": "^8.2.2",
     "underscore": "^1.8.3",
