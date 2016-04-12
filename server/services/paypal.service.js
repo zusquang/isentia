@@ -16,8 +16,8 @@ PaypalService.prototype.create = function(callback) {
       "payment_method": "paypal"
     },
     "redirect_urls": {
-      "return_url": "http://localhost:6060/#/payment/execute",
-      "cancel_url": "http://localhost:6060/#/payment/cancel"
+      "return_url": "https://isentia.herokuapp.com/#/payment/execute",
+      "cancel_url": "https://isentia.herokuapp.com/#/payment/cancel"
     },
     "transactions": [{
       "item_list": {
